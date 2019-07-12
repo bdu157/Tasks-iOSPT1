@@ -15,6 +15,7 @@ class TaskDetailViewController: UIViewController {
     @IBOutlet weak var nameTextField: UITextField!
     @IBOutlet weak var notesTextView: UITextView!
     @IBOutlet weak var saveButton: UIBarButtonItem!
+    @IBOutlet weak var prioritySegmentedControl: UISegmentedControl!
     
     var task: Task? {
         didSet {
@@ -25,6 +26,7 @@ class TaskDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.updateViews()
+        self.toggleSaveButton()
         self.nameTextField.addTarget(self, action: #selector(toggleSaveButton), for: .editingChanged)
     }
     
@@ -32,16 +34,23 @@ class TaskDetailViewController: UIViewController {
         guard let taskName = self.nameTextField.text,
             !taskName.isEmpty else {return}
         
+        
+        let priorityIndex = prioritySegmentedControl.selectedSegmentIndex
+        let priority = TaskPriority.allPriorities[priorityIndex]   //allPriorities -> allCases
+        
+        
         let notes = self.notesTextView.text
         
         if let task = self.task {
-            //edit existing task
+            //edit existing task (update)
             task.name = taskName
+            task.priority = priority.rawValue
             task.notes = notes
         } else {
-            let _ = Task(name: taskName, notes: notes)
+            //creating a new task (create)
+            let _ = Task(name: taskName, notes: notes, priority: priority)
         }
-        
+        //this is just saving all as mainContext (saveToPersistentStore(). it gets bundled and saved
         do {
             let moc = CoreDataStack.shared.mainContext
             try moc.save()
@@ -55,6 +64,14 @@ class TaskDetailViewController: UIViewController {
     private func updateViews() {
         guard isViewLoaded else {return}
         
+        let priority: TaskPriority
+        if let taskPriority = task?.priority {
+            priority = TaskPriority(rawValue: taskPriority)!
+        } else {
+            priority = .normal
+        }
+        
+        prioritySegmentedControl.selectedSegmentIndex = TaskPriority.allPriorities.firstIndex(of: priority)!   //allPriorities -> allCases
         self.title = self.task?.name ?? "Create Task"
         self.nameTextField.text = task?.name
         self.notesTextView.text = task?.notes

@@ -9,12 +9,25 @@
 import Foundation
 import CoreData
 
+//CaseIterable can also be used remove static var and add allCases. switch can also be used if we dont use static var or CaseIterable
+
+enum TaskPriority: String {
+    case low
+    case normal
+    case high
+    case critical
+    
+    static var allPriorities: [TaskPriority] {
+        return [.low, .normal, .high, .critical]
+    }
+}
 //so this will help us create model
 extension Task {
-    convenience init(name: String, notes: String? = nil, context: NSManagedObjectContext = CoreDataStack.shared.mainContext) {
+    convenience init(name: String, notes: String? = nil, priority: TaskPriority = .normal, context: NSManagedObjectContext = CoreDataStack.shared.mainContext) {
         self.init(context: context)
         self.name = name
         self.notes = notes
+        self.priority = priority.rawValue
     }
 }
 

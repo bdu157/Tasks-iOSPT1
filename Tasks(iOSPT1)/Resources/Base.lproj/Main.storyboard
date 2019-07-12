@@ -70,30 +70,50 @@
                                 <rect key="frame" x="16" y="160" width="343" height="598"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="VYf-ZX-QjW">
-                                        <rect key="frame" x="0.0" y="0.0" width="343" height="31.333333333333332"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="343" height="30"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Name:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Yv-3P-Ggd">
-                                                <rect key="frame" x="0.0" y="0.0" width="73.666666666666671" height="31.333333333333332"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="73.666666666666671" height="30"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="3Jz-Fj-yLR">
-                                                <rect key="frame" x="81.666666666666657" y="0.0" width="261.33333333333337" height="31.333333333333332"/>
+                                                <rect key="frame" x="81.666666666666657" y="0.0" width="261.33333333333337" height="30"/>
                                                 <nil key="textColor"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <textInputTraits key="textInputTraits"/>
                                             </textField>
                                         </subviews>
                                     </stackView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="gkn-ab-mq6">
+                                        <rect key="frame" x="0.0" y="38" width="343" height="31.333333333333329"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Priority:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3FQ-1j-yVq">
+                                                <rect key="frame" x="0.0" y="0.0" width="86" height="31.333333333333332"/>
+                                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="1XS-AY-w5C">
+                                                <rect key="frame" x="94" y="0.0" width="249" height="32.333333333333329"/>
+                                                <segments>
+                                                    <segment title="Low"/>
+                                                    <segment title="Normal"/>
+                                                    <segment title="High"/>
+                                                    <segment title="Critical"/>
+                                                </segments>
+                                            </segmentedControl>
+                                        </subviews>
+                                    </stackView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Notes:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="48b-fl-Lz4">
-                                        <rect key="frame" x="0.0" y="39.333333333333343" width="343" height="31.333333333333329"/>
+                                        <rect key="frame" x="0.0" y="77.333333333333343" width="343" height="31.333333333333329"/>
                                         <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="WZu-WX-578">
-                                        <rect key="frame" x="0.0" y="78.666666666666686" width="343" height="519.33333333333326"/>
+                                        <rect key="frame" x="0.0" y="116.66666666666671" width="343" height="481.33333333333326"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
@@ -120,6 +140,7 @@
                     <connections>
                         <outlet property="nameTextField" destination="3Jz-Fj-yLR" id="KA1-d4-huz"/>
                         <outlet property="notesTextView" destination="WZu-WX-578" id="guq-iY-lLX"/>
+                        <outlet property="prioritySegmentedControl" destination="1XS-AY-w5C" id="DHf-Dk-iay"/>
                         <outlet property="saveButton" destination="R4h-GK-L3y" id="cea-Vr-Idp"/>
                     </connections>
                 </viewController>
