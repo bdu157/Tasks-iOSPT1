@@ -23,6 +23,8 @@ class TaskDetailViewController: UIViewController {
         }
     }
     
+    var taskController: TaskController!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.updateViews()
@@ -46,9 +48,11 @@ class TaskDetailViewController: UIViewController {
             task.name = taskName
             task.priority = priority.rawValue
             task.notes = notes
+            taskController.put(task: task)
         } else {
             //creating a new task (create)
-            let _ = Task(name: taskName, notes: notes, priority: priority)
+            let task = Task(name: taskName, notes: notes, priority: priority)
+            taskController.put(task: task)
         }
         //this is just saving all as mainContext (saveToPersistentStore(). it gets bundled and saved
         do {

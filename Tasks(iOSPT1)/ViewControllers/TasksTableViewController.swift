@@ -48,12 +48,23 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
         try! frc.performFetch()
         return frc
     }()
+    
+    private let taskController = TaskController()
 
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.tableView.reloadData()
     }
     
+    //IBActions
+    @IBAction func refreshControl(_ sender: Any) {
+        self.taskController.fetchTaskFromServer { (_) in
+            DispatchQueue.main.async {
+                self.refreshControl?.endRefreshing()
+            }
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -92,15 +103,22 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
         if editingStyle == .delete {
             //(delete)
             let task = self.fetchedRsultsController.object(at: indexPath)
-            let moc = CoreDataStack.shared.mainContext
-            moc.delete(task)
             
-            do {
-                try moc.save()
-                self.tableView.reloadData()
-            } catch {
-                moc.reset()
-                NSLog("Error saving managed object context: \(error)")
+            taskController.deleteTaskFromServer(task) { (error) in
+                if let error = error {
+                    NSLog("error \(error)")
+                    return
+                }
+                let moc = CoreDataStack.shared.mainContext
+                moc.delete(task)
+                
+                do {
+                    try moc.save()
+                    self.tableView.reloadData()
+                } catch {
+                    moc.reset()
+                    NSLog("Error saving managed object context: \(error)")
+                }
             }
             //tableView.deleteRows(at: [indexPath], with: .fade)
         }
@@ -165,6 +183,10 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
             guard let detailVC = segue.destination as? TaskDetailViewController,
                 let indexPath = self.tableView.indexPathForSelectedRow else {return}
                 detailVC.task = self.fetchedRsultsController.object(at: indexPath)
+                detailVC.taskController = self.taskController
+        } else if segue.identifier == "ShowCreateTask" {
+            guard let detailVC = segue.destination as? TaskDetailViewController else {return}
+                detailVC.taskController = self.taskController
         }
     }
 }
