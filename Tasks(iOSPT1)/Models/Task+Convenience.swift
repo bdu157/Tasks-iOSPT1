@@ -34,7 +34,6 @@ extension Task {
         
     }
     
-    
     //initializes a task object
     convenience init(name: String, notes: String? = nil, priority: TaskPriority = .normal, identifier: UUID = UUID(), context: NSManagedObjectContext = CoreDataStack.shared.mainContext) {
         self.init(context: context)
@@ -44,11 +43,12 @@ extension Task {
         self.identifier = identifier
     }
     
-    //initialize a task object from a TaskRepresentation
+    //initialize a task object from a TaskRepresentation for firebase data
+    //it is init? because it is second initializer?
+    //failable initializer 
     convenience init?(taskRepresentation: TaskRepresentation, context: NSManagedObjectContext = CoreDataStack.shared.mainContext) {
-        guard let priority = TaskPriority(rawValue: taskRepresentation.priority),
-            let identifier = UUID(uuidString: taskRepresentation.identifier) else {return nil}
-        
+        guard let priority = TaskPriority(rawValue: taskRepresentation.priority),  //we unwrap this because enum
+           let identifier = UUID(uuidString: taskRepresentation.identifier) else {return nil} //if we dont have UUID then we want the app to crash by returning nil
         self.init(name: taskRepresentation.name,
                   notes: taskRepresentation.notes,
                   priority: priority,

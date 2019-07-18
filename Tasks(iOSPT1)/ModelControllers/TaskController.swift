@@ -9,9 +9,11 @@
 import Foundation
 import CoreData
 
-let baseURL = URL(string: "https://task-coredata.firebaseio.com/")!  //this is myown
-//https://tasks-3f211.firebaseio.com/   this is what we used for class
 
+//why didnt it work?
+let baseURL = URL(string: "https://tasks-3f211.firebaseio.com/")!  //this is myown
+//https://tasks-3f211.firebaseio.com/   this is what we used for class -> this crashed because fetch occurred due to data in this firebase
+//https://task-coredata.firebaseio.com/  when i used mine first time it did not crash becasue there was nothing to fetch (no data in this firebase)
 class TaskController {
     
     typealias CompletionHndler = (Error?) -> Void
@@ -39,7 +41,9 @@ class TaskController {
             
             do {
                 let taskRepresentations = Array(try JSONDecoder().decode([String: TaskRepresentation].self, from: data).values)
-                try self.updateTasks(with: taskRepresentations)
+                let moc = CoreDataStack.shared.container.newBackgroundContext()
+                //we just update background content we just created
+                try self.updateTasks(with: taskRepresentations, context: moc)   // fetchTaskFromServer() <= func updateTasks <= task and update
                 completion(nil)
             } catch {
                 NSLog("Error decoidng task representations: \(error)")
@@ -49,32 +53,58 @@ class TaskController {
         }.resume()
     }
     
-    private func updateTasks(with representations: [TaskRepresentation]) throws {
-        for taskRep in representations {
-            guard let uuid = UUID(uuidString: taskRep.identifier) else { continue }
+    private func updateTasks(with representations: [TaskRepresentation], context: NSManagedObjectContext) throws {  //based on decoded data from firebase
+        var error: Error? = nil
+        
+        context.performAndWait {
+            for taskRep in representations {
+                guard let uuid = UUID(uuidString: taskRep.identifier) else { continue }
             
-            let task = self.task(forUUID: uuid) //func task  -  new one
-            if let task = task {
-                self.update(task: task, with: taskRep)   //func update - updating
-            } else {
-                let _ = Task(taskRepresentation: taskRep)
+                let task = self.task(forUUID: uuid, in: context) //func task  -  to figure out if uuidString exists
+                if let task = task {
+                    self.update(task: task, with: taskRep)   //func update - updating if uuidString exists then just update and do not create a new one
+                    
+                    ///////////
+                    ///
+                    ///this part we add context: context
+                    //////////
+                    
+                    
+                } else {
+                    let _ = Task(taskRepresentation: taskRep, context: context)  //in case uuidString does not exist in Firebase then go ahead create one
+                }
+            }
+            do {
+                try context.save()
+            } catch let saveError{
+                error = saveError
             }
         }
-        try self.saveToPersistentStore()
+        if let error = error {throw error}
     }
     
     //Get task from UUID
-    private func task(forUUID uuid: UUID) -> Task? {
+    private func task(forUUID uuid: UUID, in context: NSManagedObjectContext) -> Task? {
         let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
         
         fetchRequest.predicate =  NSPredicate(format: "identifier == %@", uuid as NSUUID) //%@place holder for whatever argument to follow it only has %@ so it will only have one argument
-        do {
-            let moc = CoreDataStack.shared.mainContext
-            return try moc.fetch(fetchRequest).first
-        } catch {
-            NSLog("Error fetching task with uuid \(uuid): \(error)")
-            return nil  // no task that meets the criteria so it will just return nil
+        var result: Task? = nil
+        context.performAndWait {
+            do {
+                result = try context.fetch(fetchRequest).first  //we need to pull out to first one even though there should be only one
+            } catch {
+                NSLog("Error fetching task with \(uuid): \(error)")
+            }
         }
+        
+        return result
+//        do {
+//            let moc = CoreDataStack.shared.mainContext
+//            return try moc.fetch(fetchRequest).first
+//        } catch {
+//            NSLog("Error fetching task with uuid \(uuid): \(error)")
+//            return nil  // no task that meets the criteria so it will just return nil
+//        }
     }
     
     //update task with task representation from server
@@ -87,21 +117,21 @@ class TaskController {
     //PUT Request
     func put(task: Task, completion: @escaping CompletionHndler = { _ in}) {
         
-        let uuid = task.identifier ?? UUID()  //either already exists or create a new one
+        let uuid = task.identifier ?? UUID()  //task.identifier is actually type UUID based on SQLite model
         let requestURL = baseURL.appendingPathComponent(uuid.uuidString).appendingPathExtension("json")
         
         var request = URLRequest(url: requestURL)
         request.httpMethod = "PUT"   //add and modify
         
         do {
-            guard var representation = task.taskRepresentation else {
+            guard var representation = task.taskRepresentation else {   //used var so it could be modified below
                 completion(NSError())
                 return
             }
             representation.identifier = uuid.uuidString  //because identifier is set as string. this is why we use uuid.uuidString
             task.identifier = uuid  //local one matches what is in firebase
             try saveToPersistentStore()
-            request.httpBody = try JSONEncoder().encode(representation)
+            request.httpBody = try JSONEncoder().encode(representation) // we encoded representation instead actual task.identifier because task.identifier is SQLite model so it needs in between struct such as TaskRepresentation
         } catch {
             NSLog("Error encoding task \(task): \(error)")
             completion(error)
@@ -116,7 +146,6 @@ class TaskController {
             }
             completion(nil)
         }.resume()
-        
     }
     
     func saveToPersistentStore() throws {

@@ -8,9 +8,11 @@
 
 import Foundation
 
+
+//this is pretty much in between 
 struct TaskRepresentation: Codable {
     var name: String
     var notes: String?
     var priority: String
-    var identifier: String
+    var identifier: String  //this is an optional String and type is UUID
 }

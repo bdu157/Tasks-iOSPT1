@@ -110,14 +110,16 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
                     return
                 }
                 let moc = CoreDataStack.shared.mainContext
-                moc.delete(task)
-                
-                do {
-                    try moc.save()
-                    self.tableView.reloadData()
-                } catch {
-                    moc.reset()
-                    NSLog("Error saving managed object context: \(error)")
+                moc.performAndWait {
+                    moc.delete(task)
+                    
+                    do {
+                        try moc.save()
+                        self.tableView.reloadData()
+                    } catch {
+                        moc.reset()
+                        NSLog("Error saving managed object context: \(error)")
+                    }
                 }
             }
             //tableView.deleteRows(at: [indexPath], with: .fade)
